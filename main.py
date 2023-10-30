@@ -9,7 +9,7 @@ def get_libra_name(text: str) -> str:
     return text.split()[0].split(">")[0].split('=')[0].split('!')[0]
 
 
-def get_dependencies(package_name) -> Any:
+def get_dependencies(package_name):
     url = f"https://pypi.org/pypi/{package_name}/json"
     try:
         response = requests.get(url)
