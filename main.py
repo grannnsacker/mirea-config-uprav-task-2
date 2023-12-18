@@ -10,14 +10,17 @@ def get_libra_name(text: str) -> str:
 
 
 def get_dependencies(package_name):
-    url = f"https://pypi.org/pypi/{package_name}/json"
+    '''Метод парсинга зависимостей с сайта PYPI'''
+    url = f"https://pypi.org/pypi/{package_name}/json"  # формируем ссылку, добавляя название пакета
     try:
+        # пытаемся запарсить
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
         if 'info' in data:
             info = data['info']
             dependencies = info.get('requires_dist', list())
+            # возвращаем данные
             return dependencies
         else:
             print(f"Информация о пакете '{package_name}' не найдена на PyPI.")
@@ -28,7 +31,9 @@ def get_dependencies(package_name):
 
 
 def get_dependency(package_name: str, cur_depth: int, max_depth: int) -> None:
+    '''Рекурсивный обход и получание зависимостей'''
     if cur_depth == max_depth:
+        # если текущий равен максимальной заданной, значит надо выходить
         return
     dependencies = get_dependencies(package_name.lower())
     if dependencies:
@@ -36,8 +41,10 @@ def get_dependency(package_name: str, cur_depth: int, max_depth: int) -> None:
             parts = dependency.split(";")
             dep_name = get_libra_name(parts[0].strip())
             if package_name in DICTIONARY.keys():
+                # уже есть в словаре, добавляем еще одну зависимость
                 DICTIONARY[package_name].append(dep_name)
             else:
+                # иначе создаем зависимость
                 DICTIONARY[package_name] = [dep_name]
             get_dependency(dep_name, cur_depth + 1, max_depth)
 
@@ -55,9 +62,12 @@ def generate_dependency_graph(package_name: str, n: int) -> str or None:
 
 
 def main():
+    '''Основная функция программы'''
     if len(sys.argv) < 2:
+        # значит не переданы все аргументы и надо вызвать ошибку
         print("Ошибка")
     else:
+        # иначе все хорошо
         package_name = sys.argv[1]
         n = int(sys.argv[2])
         ans = generate_dependency_graph(package_name, n)
